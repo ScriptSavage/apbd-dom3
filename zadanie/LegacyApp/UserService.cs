@@ -8,11 +8,16 @@ namespace LegacyApp
         public bool AddUser(string firstName, string lastName, string email, DateTime dateOfBirth, int clientId)
         {
             if (isNameAndSurnameEmpty(firstName, lastName))
+            {
                 return false;
-
+            }
 
             if (!isEmailValid(email))
+            {
                 return false;
+            }
+
+            
 
             var now = DateTime.Now;
             int age = now.Year - dateOfBirth.Year;
@@ -58,9 +63,9 @@ namespace LegacyApp
                 }
             }
 
-            if (user.HasCreditLimit && user.CreditLimit < 500)
+            if (isCreditLimitValid(user))
             {
-                return false;
+                return true;
             }
 
             UserDataAccess.AddUser(user);
@@ -91,21 +96,10 @@ namespace LegacyApp
         {
             return age < 21;
         }
-
-
-        private void CheckUserCreditLimit(User user, Client client)
+        
+        private bool isCreditLimitValid(User user)
         {
-            if (client.Type == "VeryImportantClient") user.HasCreditLimit = false;
-            else
-            {
-                user.HasCreditLimit = true;
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    if (client.Type == "ImportantClient") creditLimit *= 2;
-                    user.CreditLimit = creditLimit;
-                }
-            }
+            return !user.HasCreditLimit || user.CreditLimit >= 500; 
         }
     }
 }
